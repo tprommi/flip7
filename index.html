@@ -176,10 +176,10 @@
             border-radius: 10px;
             display: flex;
             align-items: center;
-            padding: 6px 12px;
-            gap: 12px;
+            padding: 6px 10px;
+            gap: 8px;
             overflow: hidden;
-            min-height: 58px;
+            min-height: 78px;        /* Erhöht für 2 Reihen Karten */
             transition: all 0.3s ease;
         }
 
@@ -249,23 +249,26 @@
         }
 
         .player-stats-icons {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-top: 2px;
-            flex-wrap: wrap;
+        display: flex;
+        align-items: center;
+        gap: 4px;                  /* Etwas kompakterer Abstand */
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-top: 2px;
+        flex-wrap: nowrap;         /* WICHTIG: Kein Zeilenumbruch mehr erlaubt */
+        overflow: hidden;          /* Verhindert Überlaufen */
         }
 
         .stat-badge {
             display: flex;
             align-items: center;
-            gap: 3px;
+            gap: 2px;                  /* Etwas weniger Abstand innen */
             background: rgba(15, 23, 42, 0.6);
-            padding: 2px 5px;
+            padding: 2px 4px;          /* Kompakteres Padding */
             border-radius: 4px;
             border: 1px solid rgba(255,255,255,0.05);
+            white-space: nowrap;       /* WICHTIG: Verhindert Textumbruch bei zweistelligen Zahlen */
+            flex-shrink: 0;            /* Hält die Form stabil */
         }
 
         .stat-badge.highlight {
@@ -278,14 +281,17 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            width: 110px;
-            flex-shrink: 0;
+            width: 90px;             /* Feste Breite definiert */
+            min-width: 90px;         /* Verhindert Schrumpfen */
+            max-width: 90px;         /* Verhindert Vergrößern */
+            flex-shrink: 0;          /* Bleibt immer exakt gleich breit */
             background: rgba(15, 23, 42, 0.6);
             border-radius: 8px;
-            padding: 4px 6px;
+            padding: 4px;
             border: 1px solid rgba(255, 255, 255, 0.08);
             line-height: 1.1;
-        }
+            text-align: center;
+     }
 
         /* Zeile 1: Groß und Weiß */
         .score-main {
@@ -312,10 +318,10 @@
             display: flex;
             align-items: center;
             gap: 4px;
-            flex-wrap: nowrap;
-            overflow-x: auto;
+            flex-wrap: wrap;         /* ERMÖGLICHT ZWEIREIHIGKEIT */
+            overflow-x: visible;     /* Kein internes Scrollen mehr nötig */
             padding: 2px 0;
-            -webkit-overflow-scrolling: touch;
+            max-height: 80px;        /* Platz für 2 Reihen bieten */
         }
 
         .card-btn {
@@ -323,17 +329,15 @@
             border: 1px solid #475569;
             color: var(--text-light);
             border-radius: 6px;
-            padding: 4px 6px;
-            font-size: 0.8rem;
+            padding: 2px 4px;
+            font-size: 0.75rem;      /* Leicht verkleinert für besseren iPad-Fit */
             font-weight: 700;
             cursor: pointer;
-            min-width: 33px;
-            height: 36px;
+            min-width: 30px;         /* Etwas kompakter */
+            height: 32px;            /* Perfekt für zweireihiges Layout */
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-direction: column;
-            transition: all 0.1s ease;
             flex-shrink: 0;
             touch-action: manipulation;
         }
