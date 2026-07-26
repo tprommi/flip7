@@ -658,6 +658,79 @@
             text-shadow: 0 0 15px rgba(234, 179, 8, 0.6);
             margin: 10px 0;
         }
+        /* ==========================================
+        MOBILE OPTIMIERUNG (Handys & schmale Screens)
+        ========================================== */
+        @media (max-width: 600px), (orientation: portrait) and (max-width: 768px) {
+            
+            /* Scrollen auf Handys erlauben */
+            body {
+                overflow-y: auto;
+                height: auto;
+                min-height: 100vh;
+            }
+
+            #players-container {
+                overflow-y: visible;
+            }
+
+            /* Spieler-Zeile flexibel machen */
+            .player-row {
+                min-height: auto;
+                padding: 10px;
+            }
+
+            .player-row-content {
+                flex-wrap: wrap; /* Bricht nur den Karten-Bereich nach unten um */
+                gap: 8px 10px;
+                align-items: center;
+                justify-content: space-between; /* Drückt Aktionen nach ganz rechts */
+            }
+
+            /* 1. ZEILE - LINKS: Spieler-Info + Score-Box zusammen binden */
+            .player-info {
+                flex: 0 1 auto;
+                min-width: 0; /* Verhindert Überlappen bei langen Namen */
+            }
+
+            .player-score-box {
+                margin-left: 0; /* Entfernt den automatischen Abstand nach links */
+                flex-shrink: 0;
+            }
+
+            /* 1. ZEILE - RECHTS: Aktions-Buttons ganz nach rechts schieben */
+            .player-actions {
+                width: auto;
+                flex: 0 0 auto;
+                margin-left: auto; /* Schiebt Raus & Löschen nach ganz rechts */
+                order: 0;
+                padding-top: 0;
+            }
+
+            /* 2. ZEILE: Karten-Bereich (bricht als einziger nach unten um) */
+            .cards-activation-area {
+                width: 100%;
+                flex: 0 0 100%;
+                order: 3;          /* Rutscht komplett in die 2. Zeile */
+                max-height: none;  /* Kein Höhenlimit auf dem Handy */
+                justify-content: flex-start;
+                padding-top: 8px;
+                margin-top: 4px;
+                border-top: 1px solid rgba(255, 255, 255, 0.08); /* Dezente Trennlinie */
+            }
+
+            /* Karten-Buttons touch-freundlich gestalten */
+            .card-btn {
+                height: 36px;
+                min-width: 32px;
+                font-size: 0.8rem;
+            }
+
+            /* Diagramm auf Handys kompakt halten */
+            #chart-section {
+                height: 150px;
+            }
+        }
     </style>
 </head>
 <body>
