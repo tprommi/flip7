@@ -1,0 +1,1603 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Flip 7 - Punkte Zähler</title>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --panel-bg: rgba(30, 41, 59, 0.85);
+            --border-color: #334155;
+            --text-light: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-green: #22c55e;
+            --accent-blue: #3b82f6;
+            --accent-yellow: #e6ea08;
+            --accent-purple: #a855f7;
+            --accent-red: #ef4444;
+            --accent-cyan: #06b6d4;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 8px;
+            gap: 8px;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--panel-bg);
+            padding: 8px 12px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            min-height: 52px;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .title-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo {
+            font-size: 1.4rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #f43f5e, #fb923c, #facc15);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+
+        .controls-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        select, input[type="text"], button {
+            font-family: inherit;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: #1e293b;
+            color: var(--text-light);
+            padding: 6px 10px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .btn {
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            border: none;
+            touch-action: manipulation;
+            border-radius: 8px;
+            padding: 6px 12px;
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            color: white;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 8px rgba(22, 163, 74, 0.4);
+        }
+
+        .btn-secondary {
+            background: #334155;
+            color: var(--text-light);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid var(--accent-red);
+            color: #fca5a5;
+        }
+
+        .btn-icon-svg {
+            padding: 6px;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: #334155;
+            color: var(--text-light);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            touch-action: manipulation;
+        }
+
+        .btn-icon-svg svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        #players-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            overflow-y: auto;
+            min-height: 0;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .player-row {
+            position: relative;
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            padding: 6px 12px;
+            gap: 12px;
+            overflow: hidden;
+            min-height: 58px;
+            transition: all 0.3s ease;
+        }
+
+        .player-row.busted {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.4);
+        }
+
+        .player-row.frozen {
+            opacity: 0.6;
+            filter: grayscale(40%);
+        }
+
+        .player-progress {
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 0%;
+            background: var(--player-color, rgba(59, 130, 246, 0.25));
+            opacity: 0.35;
+            z-index: 0;
+            transition: width 0.4s ease-out;
+            pointer-events: none;
+        }
+
+        .player-row-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            gap: 10px;
+        }
+
+        .player-info {
+            display: flex;
+            flex-direction: column;
+            width: 170px;
+            flex-shrink: 0;
+        }
+
+        .player-name-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            padding: 2px 4px;
+            border-radius: 6px;
+            transition: background 0.15s;
+        }
+
+        .player-color-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            box-shadow: 0 0 4px rgba(0,0,0,0.4);
+        }
+
+        .player-name {
+            font-weight: 700;
+            font-size: 1.05rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .player-stats-icons {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+            flex-wrap: wrap;
+        }
+
+        .stat-badge {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            background: rgba(15, 23, 42, 0.6);
+            padding: 2px 5px;
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .stat-badge.highlight {
+            color: var(--accent-yellow);
+        }
+
+        /* ANPASSUNG: Spielstand Box zweireihig */
+        .player-score-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 110px;
+            flex-shrink: 0;
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 8px;
+            padding: 4px 6px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            line-height: 1.1;
+        }
+
+        /* Zeile 1: Groß und Weiß */
+        .score-main {
+            color: #ffffff;
+            font-size: 1.25rem;
+            font-weight: 800;
+        }
+
+        /* Zeile 2: Klein und Grün (oder Rot bei Bust) */
+        .score-sub {
+            color: var(--accent-green);
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-top: 2px;
+            min-height: 1rem; /* Verhindert Höhensprünge */
+        }
+
+        .score-sub.bust-text {
+            color: var(--accent-red);
+        }
+
+        .cards-activation-area {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            padding: 2px 0;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .card-btn {
+            background: #1e293b;
+            border: 1px solid #475569;
+            color: var(--text-light);
+            border-radius: 6px;
+            padding: 4px 6px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            min-width: 33px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            transition: all 0.1s ease;
+            flex-shrink: 0;
+            touch-action: manipulation;
+        }
+
+        .card-btn.active {
+            background: var(--btn-active-color, var(--accent-blue));
+            border-color: #ffffff;
+            color: #ffffff;
+            box-shadow: 0 0 8px var(--btn-active-color, var(--accent-blue));
+        }
+
+        .card-btn.spec-flip7 {
+            border-color: var(--accent-yellow);
+            color: var(--accent-yellow);
+            background: rgba(234, 179, 8, 0.15);
+            pointer-events: none;
+        }
+        .card-btn.spec-flip7.active {
+            background: var(--accent-yellow);
+            color: #000;
+            box-shadow: 0 0 10px var(--accent-yellow);
+        }
+
+        .card-btn.spec-modifier {
+            border-color: var(--accent-purple);
+            color: #d8b4fe;
+        }
+        .card-btn.spec-modifier.active {
+            background: var(--accent-purple);
+            color: #ffffff;
+        }
+
+        .card-btn.spec-freeze {
+            border-color: var(--accent-cyan);
+            color: #7dd3fc;
+        }
+        .card-btn.spec-freeze.active {
+            background: var(--accent-cyan);
+            color: #000;
+            box-shadow: 0 0 8px var(--accent-cyan);
+        }
+
+        .player-actions {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .btn-icon {
+            padding: 6px 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            height: 36px;
+        }
+
+        .btn-bust {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid var(--accent-red);
+            color: #fca5a5;
+            font-weight: 700;
+            padding: 0 8px;
+        }
+
+        .btn-bust.active {
+            background: var(--accent-red);
+            color: white;
+        }
+
+        #chart-section {
+            height: 170px;
+            background: var(--panel-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .chart-title {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .chart-legend {
+            display: flex;
+            gap: 10px;
+            font-size: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .chart-container {
+            flex: 1;
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        #chart-tooltip {
+            position: absolute;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 0.75rem;
+            color: var(--text-light);
+            pointer-events: none;
+            display: none;
+            z-index: 50;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            white-space: nowrap;
+        }
+
+        /* MODALS */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            padding: 12px;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background: #1e293b;
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 20px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            overflow: hidden;
+        }
+
+        .modal-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-body-scroll {
+            overflow-y: auto;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding-right: 4px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        .color-picker-grid {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 6px;
+        }
+
+        .color-option {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.1s;
+        }
+
+        .color-option.selected {
+            border-color: #ffffff;
+            box-shadow: 0 0 8px rgba(255,255,255,0.8);
+        }
+
+        /* LOGGING / PROTOKOLL STYLES */
+        .log-round-card {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .log-round-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding-bottom: 6px;
+            font-weight: 700;
+            color: var(--accent-yellow);
+        }
+
+        .log-player-block {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            background: rgba(30, 41, 59, 0.5);
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .log-player-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.9rem;
+        }
+
+        .log-player-cards-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .log-card-btn {
+            background: #0f172a;
+            border: 1px solid #334155;
+            color: var(--text-muted);
+            border-radius: 4px;
+            padding: 2px 5px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .log-card-btn.active {
+            background: var(--accent-blue);
+            color: white;
+            border-color: #ffffff;
+        }
+
+        .log-bust-btn {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid var(--accent-red);
+            color: #fca5a5;
+            padding: 2px 6px;
+            font-size: 0.75rem;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .log-bust-btn.active {
+            background: var(--accent-red);
+            color: white;
+        }
+
+        /* WINNER ANIMATION */
+        #winner-canvas {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 200;
+        }
+
+        .winner-banner {
+            text-align: center;
+            padding: 10px;
+        }
+
+        .winner-name {
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--accent-yellow);
+            text-shadow: 0 0 15px rgba(234, 179, 8, 0.6);
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="title-group">
+            <div class="logo">FLIP 7</div>
+            <div class="input-group">
+                <label for="target-score">Ziel:</label>
+                <select id="target-score" onchange="updateTargetScore()">
+                    <option value="100">100</option>
+                    <option value="150">150</option>
+                    <option value="200" selected>200</option>
+                    <option value="250">250</option>
+                    <option value="300">300</option>
+                    <option value="500">500</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="controls-group">
+            <button type="button" class="btn btn-secondary" onclick="openLogModal()">📜 Protokoll</button>
+            <button type="button" class="btn btn-secondary" onclick="openAddPlayerModal()">+ Spieler</button>
+            <button type="button" class="btn btn-success" onclick="finishRound()">Runde Beenden ➔</button>
+            <button type="button" class="btn-icon-svg" onclick="resetGame()" title="Neues Spiel starten">
+                <svg viewBox="0 0 24 24">
+                    <path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <div id="players-container"></div>
+
+    <div id="chart-section">
+        <div class="chart-header">
+            <span class="chart-title">Verlauf (Gesamtpunkte)</span>
+            <div class="chart-legend" id="chart-legend"></div>
+        </div>
+        <div class="chart-container">
+            <canvas id="scoreChart"></canvas>
+            <div id="chart-tooltip"></div>
+        </div>
+    </div>
+
+    <!-- ADD PLAYER MODAL -->
+    <div class="modal-overlay" id="add-player-modal">
+        <div class="modal-content">
+            <div class="modal-title">Neuen Spieler hinzufügen</div>
+            <form onsubmit="addPlayer(event)" action="javascript:void(0);">
+                <input type="text" id="new-player-name" placeholder="Spieler Name" autocomplete="off" style="width: 100%; margin-bottom: 12px;">
+                <div class="modal-buttons">
+                    <button type="button" class="btn btn-secondary" onclick="closeAddPlayerModal()">Abbrechen</button>
+                    <button type="submit" class="btn btn-primary">Hinzufügen</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- EDIT PLAYER MODAL -->
+    <div class="modal-overlay" id="edit-player-modal">
+        <div class="modal-content">
+            <div class="modal-title">Spieler bearbeiten</div>
+            <form onsubmit="savePlayerEdit(event)" action="javascript:void(0);">
+                <input type="text" id="edit-player-name" placeholder="Spieler Name" autocomplete="off" style="width: 100%; margin-bottom: 12px;">
+                <div style="margin-bottom: 12px;">
+                    <label style="font-size: 0.85rem; color: var(--text-muted);">Farbe wählen:</label>
+                    <div class="color-picker-grid" id="color-picker-options"></div>
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditPlayerModal()">Abbrechen</button>
+                    <button type="submit" class="btn btn-primary">Speichern</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- PROTOKOLL / LOG MODAL -->
+    <div class="modal-overlay" id="log-modal">
+        <div class="modal-content">
+            <div class="modal-title">
+                <span>Runden Protokoll</span>
+                <span style="font-size: 0.8rem; color: var(--text-muted);" id="log-round-count">0 Runden</span>
+            </div>
+            <div class="modal-body-scroll" id="log-list-container">
+                <!-- Log entries dynamically rendered -->
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-primary" onclick="closeLogModal()">Übernehmen & Schließen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- WINNER MODAL -->
+    <div class="modal-overlay" id="winner-modal">
+        <div class="modal-content winner-banner">
+            <div style="font-size: 3rem;">🎉🏆🎉</div>
+            <div style="font-weight: 700; color: var(--text-muted); text-transform: uppercase;">GEWINNER!</div>
+            <div class="winner-name" id="winner-name-display">Spieler 1</div>
+            <p style="color: var(--text-muted); font-size: 0.9rem;" id="winner-score-display">Mit 205 Punkten gewonnen!</p>
+            <div class="modal-buttons" style="justify-content: center; margin-top: 15px;">
+                <button type="button" class="btn btn-primary" onclick="closeWinnerModal()">Weiter spielen</button>
+                <button type="button" class="btn btn-success" onclick="closeWinnerModal(); resetGame();">Neues Spiel</button>
+            </div>
+        </div>
+    </div>
+
+    <canvas id="winner-canvas"></canvas>
+
+    <script>
+        function saveToStorage(key, value) {
+            try {
+                localStorage.setItem(key, JSON.stringify(value));
+            } catch(e) {
+                console.warn('Storage failed:', e);
+            }
+        }
+
+        function loadFromStorage(key) {
+            try {
+                const item = localStorage.getItem(key);
+                return item ? JSON.parse(item) : null;
+            } catch(e) {
+                console.warn('Storage load failed:', e);
+                return null;
+            }
+        }
+
+        const PLAYER_COLORS = [
+            '#3b82f6', '#22c55e', '#f59e0b', '#ec4899', 
+            '#a855f7', '#06b6d4', '#f97316', '#14b8a6', '#ef4444'
+        ];
+
+        const CARD_DEFINITIONS = [
+            { id: 'c0', label: '0', pts: 0, type: 'num' },
+            { id: 'c1', label: '1', pts: 1, type: 'num' },
+            { id: 'c2', label: '2', pts: 2, type: 'num' },
+            { id: 'c3', label: '3', pts: 3, type: 'num' },
+            { id: 'c4', label: '4', pts: 4, type: 'num' },
+            { id: 'c5', label: '5', pts: 5, type: 'num' },
+            { id: 'c6', label: '6', pts: 6, type: 'num' },
+            { id: 'c7', label: '7', pts: 7, type: 'num' },
+            { id: 'c8', label: '8', pts: 8, type: 'num' },
+            { id: 'c9', label: '9', pts: 9, type: 'num' },
+            { id: 'c10', label: '10', pts: 10, type: 'num' },
+            { id: 'c11', label: '11', pts: 11, type: 'num' },
+            { id: 'c12', label: '12', pts: 12, type: 'num' },
+            { id: 'plus2', label: '+2', pts: 2, type: 'spec-modifier', isPlus: true },
+            { id: 'plus4', label: '+4', pts: 4, type: 'spec-modifier', isPlus: true },
+            { id: 'plus6', label: '+6', pts: 6, type: 'spec-modifier', isPlus: true },
+            { id: 'plus8', label: '+8', pts: 8, type: 'spec-modifier', isPlus: true },
+            { id: 'plus10', label: '+10', pts: 10, type: 'spec-modifier', isPlus: true },
+            { id: 'mult2', label: 'x2', pts: 0, type: 'spec-modifier', special: 'x2' },
+            { id: 'freeze', label: '❄️ Freeze', pts: 0, type: 'spec-freeze', special: 'freeze' },
+            { id: 'flip7', label: '⚡ FLIP 7', pts: 15, type: 'spec-flip7', special: 'flip7' }
+        ];
+
+        let targetScore = 200;
+        let editingPlayerId = null;
+        let selectedColor = null;
+
+        let players = [];
+        let roundHistory = [];
+
+        function getDefaultPlayers() {
+            return [
+                { id: 'p1', name: 'Spieler 1', totalScore: 0, maxRoundScore: 0, flip7Count: 0, freezeCount: 0, bustCount: 0, color: PLAYER_COLORS[0], activeCards: {}, roundScore: 0, isBusted: false },
+                { id: 'p2', name: 'Spieler 2', totalScore: 0, maxRoundScore: 0, flip7Count: 0, freezeCount: 0, bustCount: 0, color: PLAYER_COLORS[1], activeCards: {}, roundScore: 0, isBusted: false },
+                { id: 'p3', name: 'Spieler 3', totalScore: 0, maxRoundScore: 0, flip7Count: 0, freezeCount: 0, bustCount: 0, color: PLAYER_COLORS[2], activeCards: {}, roundScore: 0, isBusted: false }
+            ];
+        }
+
+        function initApp() {
+            const savedPlayers = loadFromStorage('flip7_players_v3');
+            if (savedPlayers && Array.isArray(savedPlayers) && savedPlayers.length > 0) {
+                players = savedPlayers.map(p => ({
+                    id: p.id,
+                    name: p.name,
+                    color: p.color || PLAYER_COLORS[0],
+                    totalScore: p.totalScore || 0,
+                    maxRoundScore: p.maxRoundScore || 0,
+                    flip7Count: p.flip7Count || 0,
+                    freezeCount: p.freezeCount || 0,
+                    bustCount: p.bustCount || 0,
+                    activeCards: p.activeCards || {},
+                    roundScore: p.roundScore || 0,
+                    isBusted: !!p.isBusted
+                }));
+            } else {
+                players = getDefaultPlayers();
+            }
+
+            const savedHistory = loadFromStorage('flip7_history');
+            if (savedHistory && Array.isArray(savedHistory)) {
+                roundHistory = savedHistory;
+            }
+
+            renderPlayers();
+            initChart();
+        }
+
+        function saveState() {
+            saveToStorage('flip7_players_v3', players);
+            saveToStorage('flip7_history', roundHistory);
+        }
+
+        function updateTargetScore() {
+            targetScore = parseInt(document.getElementById('target-score').value) || 200;
+            renderPlayers();
+        }
+
+        function calculateCardsScore(activeCards, isBusted) {
+            if (isBusted) return 0;
+
+            let numberSum = 0;
+            let activeNumberCount = 0;
+            let plusSum = 0;
+            let hasX2 = false;
+
+            CARD_DEFINITIONS.forEach(card => {
+                if (activeCards[card.id]) {
+                    if (card.type === 'num') {
+                        numberSum += card.pts;
+                        activeNumberCount += 1;
+                    } else if (card.isPlus) {
+                        plusSum += card.pts;
+                    } else if (card.special === 'x2') {
+                        hasX2 = true;
+                    }
+                }
+            });
+
+            let isFlip7 = activeNumberCount >= 7;
+            if (isFlip7) {
+                activeCards['flip7'] = true;
+            } else {
+                delete activeCards['flip7'];
+            }
+
+            if (hasX2) {
+                numberSum = numberSum * 2;
+            }
+
+            let totalRound = numberSum + plusSum;
+            if (isFlip7) {
+                totalRound += 15;
+            }
+
+            return totalRound;
+        }
+
+        function toggleCard(playerId, cardId) {
+            const player = players.find(p => p.id === playerId);
+            if (!player) return;
+
+            if (player.isBusted) {
+                player.isBusted = false;
+            }
+
+            if (player.activeCards[cardId]) {
+                delete player.activeCards[cardId];
+            } else {
+                player.activeCards[cardId] = true;
+            }
+
+            player.roundScore = calculateCardsScore(player.activeCards, player.isBusted);
+            renderPlayers();
+        }
+
+        function toggleBust(playerId) {
+            const player = players.find(p => p.id === playerId);
+            if (!player) return;
+
+            player.isBusted = !player.isBusted;
+            if (player.isBusted) {
+                player.activeCards = {};
+                player.roundScore = 0;
+            } else {
+                player.roundScore = calculateCardsScore(player.activeCards, player.isBusted);
+            }
+            renderPlayers();
+        }
+
+        function renderPlayers() {
+            const container = document.getElementById('players-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            players.forEach((player) => {
+                const ratio = Math.min(100, Math.max(0, (player.totalScore / targetScore) * 100));
+                const isFrozen = !!player.activeCards['freeze'];
+                const isBusted = !!player.isBusted;
+
+                const row = document.createElement('div');
+                row.className = `player-row ${isBusted ? 'busted' : ''} ${isFrozen ? 'frozen' : ''}`;
+                row.style.setProperty('--player-color', player.color);
+
+                let cardsHTML = CARD_DEFINITIONS.map(card => {
+                    const isActive = !!player.activeCards[card.id];
+                    let btnStyle = "";
+                    if (isActive && card.type === 'num') {
+                        btnStyle = `--btn-active-color:${player.color}`;
+                    }
+
+                    return `<button type="button" class="card-btn ${card.type} ${isActive ? 'active' : ''}" 
+                                    style="${btnStyle}"
+                                    onclick="toggleCard('${player.id}', '${card.id}')">
+                                ${card.label}
+                            </button>`;
+                }).join('');
+
+                // ANPASSUNG: Zeile 2 Dynamisch berechnen (+Kartenpunkte und (Voraussichtlicher Gesamtstand))
+                let subScoreHTML = '';
+                if (isBusted) {
+                    subScoreHTML = `<span class="score-sub bust-text">Bust</span>`;
+                } else if (player.roundScore > 0) {
+                    const projectedScore = player.totalScore + player.roundScore;
+                    subScoreHTML = `<span class="score-sub">+${player.roundScore} (${projectedScore})</span>`;
+                } else {
+                    subScoreHTML = `<span class="score-sub">&nbsp;</span>`; // Platzhalter für Konsistenz
+                }
+
+                row.innerHTML = `
+                    <div class="player-progress" style="width: ${ratio}%;"></div>
+                    <div class="player-row-content">
+                        <div class="player-info">
+                            <div class="player-name-wrapper" onclick="openEditPlayerModal('${player.id}')" title="Klicken zum Bearbeiten">
+                                <div class="player-color-dot" style="background-color: ${player.color};"></div>
+                                <span class="player-name">${escapeHtml(player.name)}</span>
+                            </div>
+                            <div class="player-stats-icons">
+                                <span class="stat-badge ${player.maxRoundScore > 0 ? 'highlight' : ''}" title="Höchste Runde">🏆 ${player.maxRoundScore}</span>
+                                <span class="stat-badge ${player.flip7Count > 0 ? 'highlight' : ''}" title="Flip 7 Count">⚡ ${player.flip7Count}</span>
+                                <span class="stat-badge ${player.freezeCount > 0 ? 'highlight' : ''}" title="Freeze Count">❄️ ${player.freezeCount}</span>
+                                <span class="stat-badge ${player.bustCount > 0 ? 'highlight' : ''}" title="Raus-Zähler">💥 ${player.bustCount}</span>
+                            </div>
+                        </div>
+
+                        <!-- ANPASSUNG: Zweireihiger Score Box -->
+                        <div class="player-score-box">
+                            <span class="score-main">${player.totalScore}</span>
+                            ${subScoreHTML}
+                        </div>
+
+                        <div class="cards-activation-area">
+                            ${cardsHTML}
+                        </div>
+
+                        <div class="player-actions">
+                            <button type="button" class="btn btn-bust ${isBusted ? 'active' : ''}" onclick="toggleBust('${player.id}')" title="Spieler aus dieser Runde werfen">
+                                💥 Raus
+                            </button>
+                            <button type="button" class="btn btn-secondary btn-icon" onclick="deletePlayer('${player.id}')" title="Spieler löschen">🗑️</button>
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(row);
+            });
+
+            updateChart();
+            saveState();
+        }
+
+        function finishRound() {
+            let roundDetails = {
+                round: roundHistory.length + 1,
+                scores: {},
+                roundPoints: {},
+                cards: {},
+                busted: {}
+            };
+
+            let winnerCandidate = null;
+
+            players.forEach(player => {
+                const rPts = player.isBusted ? 0 : (player.roundScore || 0);
+
+                player.totalScore += rPts;
+
+                if (rPts > player.maxRoundScore) {
+                    player.maxRoundScore = rPts;
+                }
+
+                if (player.activeCards['flip7'] && !player.isBusted) {
+                    player.flip7Count += 1;
+                }
+
+                if (player.activeCards['freeze'] && !player.isBusted) {
+                    player.freezeCount += 1;
+                }
+
+                if (player.isBusted) {
+                    player.bustCount += 1;
+                }
+
+                roundDetails.roundPoints[player.id] = rPts;
+                roundDetails.scores[player.id] = player.totalScore;
+                roundDetails.cards[player.id] = { ...player.activeCards };
+                roundDetails.busted[player.id] = player.isBusted;
+
+                player.activeCards = {};
+                player.roundScore = 0;
+                player.isBusted = false;
+
+                if (player.totalScore >= targetScore) {
+                    if (!winnerCandidate || player.totalScore > winnerCandidate.totalScore) {
+                        winnerCandidate = player;
+                    }
+                }
+            });
+
+            roundHistory.push(roundDetails);
+
+            players.sort((a, b) => b.totalScore - a.totalScore);
+            renderPlayers();
+
+            if (winnerCandidate) {
+                triggerWinnerAnimation(winnerCandidate);
+            }
+        }
+
+        /* PROTOKOLL / LOG FUNCTIONALITY WITH CARD INTERACTIVITY */
+        function openLogModal() {
+            renderLogContent();
+            document.getElementById('log-modal').classList.add('active');
+        }
+
+        function renderLogContent() {
+            const logContainer = document.getElementById('log-list-container');
+            const logCount = document.getElementById('log-round-count');
+            logContainer.innerHTML = '';
+            logCount.innerText = `${roundHistory.length} Runden`;
+
+            if (roundHistory.length === 0) {
+                logContainer.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 20px;">Noch keine Runden gespielt.</div>`;
+                return;
+            }
+
+            for (let rIdx = roundHistory.length - 1; rIdx >= 0; rIdx--) {
+                const rData = roundHistory[rIdx];
+                const roundCard = document.createElement('div');
+                roundCard.className = 'log-round-card';
+
+                let playersLogHTML = players.map(p => {
+                    const isBust = !!(rData.busted && rData.busted[p.id]);
+                    const activeCardsMap = (rData.cards && rData.cards[p.id]) ? rData.cards[p.id] : {};
+                    const roundPts = rData.roundPoints ? (rData.roundPoints[p.id] || 0) : 0;
+
+                    let cardButtonsHTML = CARD_DEFINITIONS.map(c => {
+                        const isActive = !!activeCardsMap[c.id];
+                        return `<button type="button" class="log-card-btn ${isActive ? 'active' : ''}" 
+                                        onclick="toggleLogCard(${rIdx}, '${p.id}', '${c.id}')">
+                                    ${c.label}
+                                </button>`;
+                    }).join('');
+
+                    return `
+                        <div class="log-player-block">
+                            <div class="log-player-header">
+                                <span style="font-weight:700; color:${p.color};">${escapeHtml(p.name)}</span>
+                                <div>
+                                    <button type="button" class="log-bust-btn ${isBust ? 'active' : ''}" onclick="toggleLogBust(${rIdx}, '${p.id}')">
+                                        💥 Raus
+                                    </button>
+                                    <span style="font-weight:700; margin-left: 8px; color: var(--accent-green);">+${roundPts} Pkt</span>
+                                </div>
+                            </div>
+                            <div class="log-player-cards-grid">
+                                ${cardButtonsHTML}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                roundCard.innerHTML = `
+                    <div class="log-round-header">
+                        <span>Runde ${rData.round}</span>
+                        <button type="button" class="btn btn-danger" style="font-size:0.75rem; padding: 2px 8px;" onclick="deleteRound(${rIdx})">Löschen</button>
+                    </div>
+                    ${playersLogHTML}
+                `;
+
+                logContainer.appendChild(roundCard);
+            }
+        }
+
+        function toggleLogCard(roundIdx, playerId, cardId) {
+            const rData = roundHistory[roundIdx];
+            if (!rData) return;
+            if (!rData.cards[playerId]) rData.cards[playerId] = {};
+
+            if (rData.busted && rData.busted[playerId]) {
+                rData.busted[playerId] = false;
+            }
+
+            if (rData.cards[playerId][cardId]) {
+                delete rData.cards[playerId][cardId];
+            } else {
+                rData.cards[playerId][cardId] = true;
+            }
+
+            rData.roundPoints[playerId] = calculateCardsScore(rData.cards[playerId], rData.busted[playerId]);
+            renderLogContent();
+        }
+
+        function toggleLogBust(roundIdx, playerId) {
+            const rData = roundHistory[roundIdx];
+            if (!rData) return;
+            if (!rData.busted) rData.busted = {};
+
+            rData.busted[playerId] = !rData.busted[playerId];
+            if (rData.busted[playerId]) {
+                rData.cards[playerId] = {};
+                rData.roundPoints[playerId] = 0;
+            } else {
+                rData.roundPoints[playerId] = calculateCardsScore(rData.cards[playerId], false);
+            }
+            renderLogContent();
+        }
+
+        function closeLogModal() {
+            document.getElementById('log-modal').classList.remove('active');
+            recalculateAllStats();
+        }
+
+        function deleteRound(index) {
+            if (confirm(`Runde ${roundHistory[index].round} wirklich löschen? Alle Punkte werden neu berechnet.`)) {
+                roundHistory.splice(index, 1);
+                roundHistory.forEach((r, idx) => {
+                    r.round = idx + 1;
+                });
+                renderLogContent();
+            }
+        }
+
+        function recalculateAllStats() {
+            players.forEach(p => {
+                p.totalScore = 0;
+                p.maxRoundScore = 0;
+                p.flip7Count = 0;
+                p.freezeCount = 0;
+                p.bustCount = 0;
+            });
+
+            roundHistory.forEach(rData => {
+                if (!rData.roundPoints) rData.roundPoints = {};
+
+                players.forEach(p => {
+                    const isBust = !!(rData.busted && rData.busted[p.id]);
+                    const roundPts = isBust ? 0 : calculateCardsScore(rData.cards[p.id] || {}, false);
+                    rData.roundPoints[p.id] = roundPts;
+
+                    p.totalScore += roundPts;
+                    rData.scores[p.id] = p.totalScore;
+
+                    if (roundPts > p.maxRoundScore) {
+                        p.maxRoundScore = roundPts;
+                    }
+
+                    const cardsMap = rData.cards[p.id] || {};
+                    if (cardsMap['flip7'] && !isBust) p.flip7Count += 1;
+                    if (cardsMap['freeze'] && !isBust) p.freezeCount += 1;
+                    if (isBust) p.bustCount += 1;
+                });
+            });
+
+            players.sort((a, b) => b.totalScore - a.totalScore);
+            renderPlayers();
+        }
+
+        /* MODAL & PLAYER MANAGEMENT */
+        function openEditPlayerModal(id) {
+            editingPlayerId = id;
+            const player = players.find(p => p.id === id);
+            if (!player) return;
+
+            document.getElementById('edit-player-name').value = player.name;
+            selectedColor = player.color;
+
+            const grid = document.getElementById('color-picker-options');
+            grid.innerHTML = PLAYER_COLORS.map(c => `
+                <div class="color-option ${c === selectedColor ? 'selected' : ''}" 
+                     style="background:${c}" 
+                     onclick="selectColor('${c}', this)"></div>
+            `).join('');
+
+            document.getElementById('edit-player-modal').classList.add('active');
+        }
+
+        function selectColor(color, el) {
+            selectedColor = color;
+            document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+
+        function closeEditPlayerModal() {
+            document.getElementById('edit-player-modal').classList.remove('active');
+            editingPlayerId = null;
+        }
+
+        function savePlayerEdit(e) {
+            if(e && e.preventDefault) e.preventDefault();
+            if (!editingPlayerId) return;
+            const player = players.find(p => p.id === editingPlayerId);
+            if (player) {
+                const nameInput = document.getElementById('edit-player-name');
+                const name = nameInput.value.trim();
+                if (name) player.name = name;
+                if (selectedColor) player.color = selectedColor;
+
+                renderPlayers();
+            }
+            closeEditPlayerModal();
+            return false;
+        }
+
+        function openAddPlayerModal() {
+            document.getElementById('add-player-modal').classList.add('active');
+            setTimeout(() => {
+                const el = document.getElementById('new-player-name');
+                if (el) el.focus();
+            }, 150);
+        }
+
+        function closeAddPlayerModal() {
+            document.getElementById('add-player-modal').classList.remove('active');
+            const el = document.getElementById('new-player-name');
+            if (el) el.value = '';
+        }
+
+        function addPlayer(e) {
+            if(e && e.preventDefault) e.preventDefault();
+            const input = document.getElementById('new-player-name');
+            const name = input ? input.value.trim() : '';
+            if (!name) return false;
+
+            const newColor = PLAYER_COLORS[players.length % PLAYER_COLORS.length];
+            const newPlayer = {
+                id: 'p_' + Date.now(),
+                name: name,
+                totalScore: 0,
+                maxRoundScore: 0,
+                flip7Count: 0,
+                freezeCount: 0,
+                bustCount: 0,
+                color: newColor,
+                activeCards: {},
+                roundScore: 0,
+                isBusted: false
+            };
+
+            players.push(newPlayer);
+            closeAddPlayerModal();
+            renderPlayers();
+            return false;
+        }
+
+        function deletePlayer(id) {
+            if (confirm('Spieler wirklich entfernen?')) {
+                players = players.filter(p => p.id !== id);
+                renderPlayers();
+            }
+        }
+
+        function resetGame() {
+            if (confirm('Möchtest du ein neues Spiel starten und alle Punkte zurücksetzen?')) {
+                players.forEach(p => {
+                    p.totalScore = 0;
+                    p.maxRoundScore = 0;
+                    p.flip7Count = 0;
+                    p.freezeCount = 0;
+                    p.bustCount = 0;
+                    p.activeCards = {};
+                    p.roundScore = 0;
+                    p.isBusted = false;
+                });
+                roundHistory = [];
+                renderPlayers();
+            }
+        }
+
+        function escapeHtml(str) {
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        /* CHART SYSTEM */
+        let canvas, ctx;
+        let chartBarHitboxes = [];
+
+        function initChart() {
+            canvas = document.getElementById('scoreChart');
+            if (!canvas) return;
+            ctx = canvas.getContext('2d');
+
+            function resize() {
+                if (!canvas || !canvas.parentElement) return;
+                const rect = canvas.parentElement.getBoundingClientRect();
+                canvas.width = rect.width * (window.devicePixelRatio || 1);
+                canvas.height = rect.height * (window.devicePixelRatio || 1);
+                ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+                updateChart();
+            }
+
+            window.addEventListener('resize', resize);
+            
+            canvas.addEventListener('mousemove', handleChartMouseMove);
+            canvas.addEventListener('touchstart', handleChartMouseMove);
+            canvas.addEventListener('mouseleave', handleChartMouseLeave);
+
+            resize();
+        }
+
+        function updateChart() {
+            if (!canvas || !ctx) return;
+
+            const dpr = window.devicePixelRatio || 1;
+            const width = canvas.width / dpr;
+            const height = canvas.height / dpr;
+
+            ctx.clearRect(0, 0, width, height);
+            chartBarHitboxes = [];
+
+            const legendContainer = document.getElementById('chart-legend');
+            if (legendContainer) {
+                legendContainer.innerHTML = players.map(p => `
+                    <div class="legend-item">
+                        <div style="width:10px;height:10px;border-radius:2px;background:${p.color}"></div>
+                        <span style="color:#cbd5e1;font-weight:600;">${escapeHtml(p.name)}</span>
+                    </div>
+                `).join('');
+            }
+
+            const paddingLeft = 32;
+            const paddingBottom = 22;
+            const paddingTop = 12;
+            const paddingRight = 12;
+
+            const chartWidth = width - paddingLeft - paddingRight;
+            const chartHeight = height - paddingTop - paddingBottom;
+
+            let maxVal = targetScore;
+            roundHistory.forEach(r => {
+                Object.values(r.scores).forEach(val => {
+                    if (val > maxVal) maxVal = val;
+                });
+            });
+
+            const gridLines = 4;
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 1;
+            ctx.fillStyle = '#64748b';
+            ctx.font = '10px sans-serif';
+            ctx.textAlign = 'right';
+
+            for (let i = 0; i <= gridLines; i++) {
+                const yVal = Math.round((maxVal / gridLines) * i);
+                const yPos = paddingTop + chartHeight - (i / gridLines) * chartHeight;
+
+                ctx.beginPath();
+                ctx.moveTo(paddingLeft, yPos);
+                ctx.lineTo(width - paddingRight, yPos);
+                ctx.stroke();
+
+                ctx.fillText(yVal, paddingLeft - 5, yPos + 3);
+            }
+
+            const displayRounds = roundHistory.slice(-12);
+            const MAX_SLOTS = 12;
+            const slotWidth = chartWidth / MAX_SLOTS;
+            const numPlayers = players.length;
+            const barGap = 1.5;
+
+            for (let slotIdx = 0; slotIdx < MAX_SLOTS; slotIdx++) {
+                const groupX = paddingLeft + slotIdx * slotWidth + slotWidth / 2;
+                
+                if (slotIdx < displayRounds.length) {
+                    const rData = displayRounds[slotIdx];
+
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(`R${rData.round}`, groupX, height - 5);
+
+                    const availableWidth = slotWidth - 8;
+                    const barWidth = Math.max(3, Math.min(14, (availableWidth - (numPlayers - 1) * barGap) / numPlayers));
+                    const startX = groupX - ((numPlayers * barWidth + (numPlayers - 1) * barGap) / 2);
+
+                    players.forEach((p, pIdx) => {
+                        const score = rData.scores[p.id] || 0;
+                        const barH = (score / maxVal) * chartHeight;
+                        const x = startX + pIdx * (barWidth + barGap);
+                        const y = paddingTop + chartHeight - barH;
+
+                        ctx.fillStyle = p.color;
+
+                        const radius = Math.min(3, barWidth / 2);
+                        ctx.beginPath();
+                        ctx.moveTo(x, y + radius);
+                        ctx.arcTo(x, y, x + barWidth, y, radius);
+                        ctx.arcTo(x + barWidth, y, x + barWidth, y + barH, radius);
+                        ctx.lineTo(x + barWidth, paddingTop + chartHeight);
+                        ctx.lineTo(x, paddingTop + chartHeight);
+                        ctx.closePath();
+                        ctx.fill();
+
+                        chartBarHitboxes.push({
+                            x: x,
+                            y: y,
+                            w: barWidth,
+                            h: barH,
+                            playerName: p.name,
+                            score: score,
+                            round: rData.round
+                        });
+                    });
+                } else {
+                    ctx.fillStyle = '#1e293b';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(`-`, groupX, height - 5);
+                }
+            }
+        }
+
+        function handleChartMouseMove(e) {
+            if (!canvas) return;
+            const rect = canvas.getBoundingClientRect();
+            let clientX = e.clientX;
+            let clientY = e.clientY;
+
+            if(e.touches && e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            }
+
+            const mouseX = clientX - rect.left;
+            const mouseY = clientY - rect.top;
+
+            const tooltip = document.getElementById('chart-tooltip');
+            let hit = null;
+
+            for (let box of chartBarHitboxes) {
+                if (mouseX >= box.x && mouseX <= box.x + box.w &&
+                    mouseY >= box.y && mouseY <= box.y + box.h) {
+                    hit = box;
+                    break;
+                }
+            }
+
+            if (hit) {
+                tooltip.style.display = 'block';
+                tooltip.style.left = (hit.x + hit.w / 2) + 'px';
+                tooltip.style.top = Math.max(0, hit.y - 32) + 'px';
+                tooltip.innerHTML = `<strong>${escapeHtml(hit.playerName)}</strong> (Runde ${hit.round}): ${hit.score} Pkt.`;
+            } else {
+                tooltip.style.display = 'none';
+            }
+        }
+
+        function handleChartMouseLeave() {
+            const tooltip = document.getElementById('chart-tooltip');
+            if (tooltip) tooltip.style.display = 'none';
+        }
+
+        /* WINNER ANIMATION (CONFETTI) */
+        let confettiParticles = [];
+        let animationFrameId = null;
+
+        function triggerWinnerAnimation(winner) {
+            document.getElementById('winner-name-display').innerText = winner.name;
+            document.getElementById('winner-score-display').innerText = `Mit ${winner.totalScore} Punkten gewonnen! (Ziel: ${targetScore})`;
+            document.getElementById('winner-modal').classList.add('active');
+
+            startConfetti();
+        }
+
+        function closeWinnerModal() {
+            document.getElementById('winner-modal').classList.remove('active');
+            stopConfetti();
+        }
+
+        function startConfetti() {
+            const cCanvas = document.getElementById('winner-canvas');
+            cCanvas.width = window.innerWidth;
+            cCanvas.height = window.innerHeight;
+            const cCtx = cCanvas.getContext('2d');
+
+            confettiParticles = [];
+            const colors = ['#22c55e', '#3b82f6', '#eab308', '#a855f7', '#ef4444', '#06b6d4', '#f97316'];
+
+            for (let i = 0; i < 150; i++) {
+                confettiParticles.push({
+                    x: Math.random() * cCanvas.width,
+                    y: Math.random() * cCanvas.height - cCanvas.height,
+                    size: Math.random() * 8 + 4,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    vy: Math.random() * 3 + 2,
+                    vx: Math.random() * 2 - 1,
+                    rot: Math.random() * 360,
+                    vRot: Math.random() * 10 - 5
+                });
+            }
+
+            function loop() {
+                cCtx.clearRect(0, 0, cCanvas.width, cCanvas.height);
+                confettiParticles.forEach(p => {
+                    p.y += p.vy;
+                    p.x += p.vx;
+                    p.rot += p.vRot;
+
+                    if (p.y > cCanvas.height) {
+                        p.y = -10;
+                        p.x = Math.random() * cCanvas.width;
+                    }
+
+                    cCtx.save();
+                    cCtx.translate(p.x, p.y);
+                    cCtx.rotate((p.rot * Math.PI) / 180);
+                    cCtx.fillStyle = p.color;
+                    cCtx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                    cCtx.restore();
+                });
+
+                animationFrameId = requestAnimationFrame(loop);
+            }
+
+            loop();
+        }
+
+        function stopConfetti() {
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+            }
+            const cCanvas = document.getElementById('winner-canvas');
+            if (cCanvas) {
+                const cCtx = cCanvas.getContext('2d');
+                cCtx.clearRect(0, 0, cCanvas.width, cCanvas.height);
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
+    </script>
+</body>
+</html>
