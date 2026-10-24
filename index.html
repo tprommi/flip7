@@ -132,6 +132,12 @@
             color: var(--text-light);
         }
 
+        .btn-language {
+            min-width: 36px;
+            padding: 5px 8px;
+            font-size: 0.8rem;
+        }
+
         .btn-danger {
             background: rgba(239, 68, 68, 0.2);
             border: 1px solid var(--accent-red);
@@ -662,6 +668,14 @@
         MOBILE OPTIMIERUNG (Handys & schmale Screens)
         ========================================== */
         @media (max-width: 600px), (orientation: portrait) and (max-width: 768px) {
+
+            .controls-group {
+                gap: 4px;
+            }
+
+            .controls-group .btn:not(.btn-language) {
+                padding: 6px 8px;
+            }
             
             /* Scrollen auf Handys erlauben */
             body {
@@ -739,7 +753,7 @@
         <div class="title-group">
             <div class="logo">FLIP 7</div>
             <div class="input-group">
-                <label for="target-score">Ziel:</label>
+                <label for="target-score" data-i18n="target">Ziel:</label>
                 <select id="target-score" onchange="updateTargetScore()">
                     <option value="100">100</option>
                     <option value="150">150</option>
@@ -752,10 +766,11 @@
         </div>
 
         <div class="controls-group">
-            <button type="button" class="btn btn-secondary" onclick="openLogModal()">📜 Protokoll</button>
-            <button type="button" class="btn btn-secondary" onclick="openAddPlayerModal()">+ Spieler</button>
-            <button type="button" class="btn btn-success" onclick="finishRound()">Runde Beenden ➔</button>
-            <button type="button" class="btn-icon-svg" onclick="resetGame()" title="Neues Spiel starten">
+            <button type="button" id="language-button" class="btn btn-secondary btn-language" onclick="toggleLanguage()" aria-label="Zu Englisch wechseln" title="Zu Englisch wechseln">DE</button>
+            <button type="button" class="btn btn-secondary" onclick="openLogModal()" data-i18n="logButton">📜 Protokoll</button>
+            <button type="button" class="btn btn-secondary" onclick="openAddPlayerModal()" data-i18n="addPlayerButton">+ Spieler</button>
+            <button type="button" class="btn btn-success" onclick="finishRound()" data-i18n="finishRoundButton">Runde Beenden ➔</button>
+            <button type="button" class="btn-icon-svg" onclick="resetGame()" title="Neues Spiel starten" data-i18n-title="newGameTitle">
                 <svg viewBox="0 0 24 24">
                     <path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
                 </svg>
@@ -767,7 +782,7 @@
 
     <div id="chart-section">
         <div class="chart-header">
-            <span class="chart-title">Verlauf (Gesamtpunkte)</span>
+            <span class="chart-title" data-i18n="chartTitle">Verlauf (Gesamtpunkte)</span>
             <div class="chart-legend" id="chart-legend"></div>
         </div>
         <div class="chart-container">
@@ -779,12 +794,12 @@
     <!-- ADD PLAYER MODAL -->
     <div class="modal-overlay" id="add-player-modal">
         <div class="modal-content">
-            <div class="modal-title">Neuen Spieler hinzufügen</div>
+            <div class="modal-title" data-i18n="addPlayerTitle">Neuen Spieler hinzufügen</div>
             <form onsubmit="addPlayer(event)" action="javascript:void(0);">
-                <input type="text" id="new-player-name" placeholder="Spieler Name" autocomplete="off" style="width: 100%; margin-bottom: 12px;">
+                <input type="text" id="new-player-name" placeholder="Spieler Name" data-i18n-placeholder="playerNamePlaceholder" autocomplete="off" style="width: 100%; margin-bottom: 12px;">
                 <div class="modal-buttons">
-                    <button type="button" class="btn btn-secondary" onclick="closeAddPlayerModal()">Abbrechen</button>
-                    <button type="submit" class="btn btn-primary">Hinzufügen</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeAddPlayerModal()" data-i18n="cancel">Abbrechen</button>
+                    <button type="submit" class="btn btn-primary" data-i18n="add">Hinzufügen</button>
                 </div>
             </form>
         </div>
@@ -793,16 +808,16 @@
     <!-- EDIT PLAYER MODAL -->
     <div class="modal-overlay" id="edit-player-modal">
         <div class="modal-content">
-            <div class="modal-title">Spieler bearbeiten</div>
+            <div class="modal-title" data-i18n="editPlayerTitle">Spieler bearbeiten</div>
             <form onsubmit="savePlayerEdit(event)" action="javascript:void(0);">
-                <input type="text" id="edit-player-name" placeholder="Spieler Name" autocomplete="off" style="width: 100%; margin-bottom: 12px;">
+                <input type="text" id="edit-player-name" placeholder="Spieler Name" data-i18n-placeholder="playerNamePlaceholder" autocomplete="off" style="width: 100%; margin-bottom: 12px;">
                 <div style="margin-bottom: 12px;">
-                    <label style="font-size: 0.85rem; color: var(--text-muted);">Farbe wählen:</label>
+                    <label style="font-size: 0.85rem; color: var(--text-muted);" data-i18n="chooseColor">Farbe wählen:</label>
                     <div class="color-picker-grid" id="color-picker-options"></div>
                 </div>
                 <div class="modal-buttons">
-                    <button type="button" class="btn btn-secondary" onclick="closeEditPlayerModal()">Abbrechen</button>
-                    <button type="submit" class="btn btn-primary">Speichern</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeEditPlayerModal()" data-i18n="cancel">Abbrechen</button>
+                    <button type="submit" class="btn btn-primary" data-i18n="save">Speichern</button>
                 </div>
             </form>
         </div>
@@ -812,14 +827,14 @@
     <div class="modal-overlay" id="log-modal">
         <div class="modal-content">
             <div class="modal-title">
-                <span>Runden Protokoll</span>
+                <span data-i18n="logTitle">Rundenprotokoll</span>
                 <span style="font-size: 0.8rem; color: var(--text-muted);" id="log-round-count">0 Runden</span>
             </div>
             <div class="modal-body-scroll" id="log-list-container">
                 <!-- Log entries dynamically rendered -->
             </div>
             <div class="modal-buttons">
-                <button type="button" class="btn btn-primary" onclick="closeLogModal()">Übernehmen & Schließen</button>
+                <button type="button" class="btn btn-primary" onclick="closeLogModal()" data-i18n="applyClose">Übernehmen & Schließen</button>
             </div>
         </div>
     </div>
@@ -828,12 +843,12 @@
     <div class="modal-overlay" id="winner-modal">
         <div class="modal-content winner-banner">
             <div style="font-size: 3rem;">🎉🏆🎉</div>
-            <div style="font-weight: 700; color: var(--text-muted); text-transform: uppercase;">GEWINNER!</div>
+            <div style="font-weight: 700; color: var(--text-muted); text-transform: uppercase;" data-i18n="winner">GEWINNER!</div>
             <div class="winner-name" id="winner-name-display">Spieler 1</div>
             <p style="color: var(--text-muted); font-size: 0.9rem;" id="winner-score-display">Mit 205 Punkten gewonnen!</p>
             <div class="modal-buttons" style="justify-content: center; margin-top: 15px;">
-                <button type="button" class="btn btn-primary" onclick="closeWinnerModal()">Weiter spielen</button>
-                <button type="button" class="btn btn-success" onclick="closeWinnerModal(); resetGame();">Neues Spiel</button>
+                <button type="button" class="btn btn-primary" onclick="closeWinnerModal()" data-i18n="continue">Weiter spielen</button>
+                <button type="button" class="btn btn-success" onclick="closeWinnerModal(); resetGame();" data-i18n="newGame">Neues Spiel</button>
             </div>
         </div>
     </div>
@@ -841,6 +856,92 @@
     <canvas id="winner-canvas"></canvas>
 
     <script>
+        const TRANSLATIONS = {
+            de: {
+                pageTitle: 'Flip 7 - Punktezähler', target: 'Ziel:', switchLanguage: 'Zu Englisch wechseln',
+                logButton: '📜 Protokoll', addPlayerButton: '+ Spieler', finishRoundButton: 'Runde Beenden ➔',
+                newGameTitle: 'Neues Spiel starten', chartTitle: 'Verlauf (Gesamtpunkte)',
+                addPlayerTitle: 'Neuen Spieler hinzufügen', playerNamePlaceholder: 'Spielername',
+                cancel: 'Abbrechen', add: 'Hinzufügen', editPlayerTitle: 'Spieler bearbeiten',
+                chooseColor: 'Farbe wählen:', save: 'Speichern', logTitle: 'Rundenprotokoll',
+                applyClose: 'Übernehmen & schließen', winner: 'GEWINNER!', continue: 'Weiter spielen',
+                newGame: 'Neues Spiel', player: 'Spieler', bust: 'Raus', editPlayerHint: 'Zum Bearbeiten antippen',
+                bestRound: 'Beste Runde', flip7Count: 'Flip 7-Anzahl', freezeCount: 'Freeze-Anzahl',
+                bustCount: 'Raus-Anzahl', bustHint: 'Spieler aus dieser Runde nehmen',
+                deletePlayerHint: 'Spieler löschen', rounds: 'Runden', round: 'Runde', roundSingular: 'Runde',
+                noRounds: 'Noch keine Runden gespielt.', pointsShort: 'Pkt.', delete: 'Löschen',
+                deleteRoundConfirm: 'Runde {round} wirklich löschen? Alle Punkte werden neu berechnet.',
+                deletePlayerConfirm: 'Spieler wirklich entfernen?',
+                resetConfirm: 'Möchtest du ein neues Spiel starten und alle Punkte zurücksetzen?',
+                winnerScore: 'Mit {score} Punkten gewonnen! (Ziel: {target})'
+            },
+            en: {
+                pageTitle: 'Flip 7 - Score Tracker', target: 'Target:', switchLanguage: 'Switch to German',
+                logButton: '📜 History', addPlayerButton: '+ Player', finishRoundButton: 'Finish round ➔',
+                newGameTitle: 'Start a new game', chartTitle: 'Progress (total points)',
+                addPlayerTitle: 'Add a player', playerNamePlaceholder: 'Player name',
+                cancel: 'Cancel', add: 'Add', editPlayerTitle: 'Edit player',
+                chooseColor: 'Choose color:', save: 'Save', logTitle: 'Round history',
+                applyClose: 'Apply & close', winner: 'WINNER!', continue: 'Keep playing',
+                newGame: 'New game', player: 'Player', bust: 'Bust', editPlayerHint: 'Tap to edit',
+                bestRound: 'Best round', flip7Count: 'Flip 7 count', freezeCount: 'Freeze count',
+                bustCount: 'Bust count', bustHint: 'Mark player as busted this round',
+                deletePlayerHint: 'Delete player', rounds: 'rounds', round: 'Round', roundSingular: 'round',
+                noRounds: 'No rounds played yet.', pointsShort: 'pts', delete: 'Delete',
+                deleteRoundConfirm: 'Delete round {round}? All scores will be recalculated.',
+                deletePlayerConfirm: 'Remove this player?',
+                resetConfirm: 'Start a new game and reset all scores?',
+                winnerScore: 'Won with {score} points! (Target: {target})'
+            }
+        };
+
+        let language = 'de';
+        let winnerPlayerId = null;
+
+        function t(key, values = {}) {
+            return (TRANSLATIONS[language][key] || key).replace(/\{(\w+)\}/g, (_, name) => values[name] ?? '');
+        }
+
+        function applyTranslations() {
+            document.documentElement.lang = language;
+            document.title = t('pageTitle');
+            const languageButton = document.getElementById('language-button');
+            languageButton.textContent = language.toUpperCase();
+            languageButton.title = t('switchLanguage');
+            languageButton.setAttribute('aria-label', t('switchLanguage'));
+            document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+            document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = t(el.dataset.i18nTitle); });
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.dataset.i18nPlaceholder); });
+            document.getElementById('log-round-count').textContent = `${roundHistory.length} ${t(roundHistory.length === 1 ? 'roundSingular' : 'rounds')}`;
+            if (document.getElementById('log-modal').classList.contains('active')) renderLogContent();
+            if (document.getElementById('winner-modal').classList.contains('active')) {
+                const winner = players.find(p => p.id === winnerPlayerId);
+                if (winner) {
+                    document.getElementById('winner-name-display').textContent = winner.name;
+                    document.getElementById('winner-score-display').textContent = t('winnerScore', { score: winner.totalScore, target: targetScore });
+                }
+            }
+            renderPlayers();
+        }
+
+        function setLanguage(nextLanguage) {
+            if (!TRANSLATIONS[nextLanguage] || nextLanguage === language) return;
+            const oldName = TRANSLATIONS[language].player;
+            const newName = TRANSLATIONS[nextLanguage].player;
+            players.forEach(player => {
+                if (/^p[1-3]$/.test(player.id) && player.name === `${oldName} ${player.id.slice(1)}`) {
+                    player.name = `${newName} ${player.id.slice(1)}`;
+                }
+            });
+            language = nextLanguage;
+            saveToStorage('flip7_language', language);
+            applyTranslations();
+        }
+
+        function toggleLanguage() {
+            setLanguage(language === 'de' ? 'en' : 'de');
+        }
+
         function saveToStorage(key, value) {
             try {
                 localStorage.setItem(key, JSON.stringify(value));
@@ -897,13 +998,15 @@
 
         function getDefaultPlayers() {
             return [
-                { id: 'p1', name: 'Spieler 1', totalScore: 0, maxRoundScore: 0, flip7Count: 0, freezeCount: 0, bustCount: 0, color: PLAYER_COLORS[0], activeCards: {}, roundScore: 0, isBusted: false },
-                { id: 'p2', name: 'Spieler 2', totalScore: 0, maxRoundScore: 0, flip7Count: 0, freezeCount: 0, bustCount: 0, color: PLAYER_COLORS[1], activeCards: {}, roundScore: 0, isBusted: false },
-                { id: 'p3', name: 'Spieler 3', totalScore: 0, maxRoundScore: 0, flip7Count: 0, freezeCount: 0, bustCount: 0, color: PLAYER_COLORS[2], activeCards: {}, roundScore: 0, isBusted: false }
+                { id: 'p1', name: `${t('player')} 1`, totalScore: 0, maxRoundScore: 0, flip7Count: 0, freezeCount: 0, bustCount: 0, color: PLAYER_COLORS[0], activeCards: {}, roundScore: 0, isBusted: false },
+                { id: 'p2', name: `${t('player')} 2`, totalScore: 0, maxRoundScore: 0, flip7Count: 0, freezeCount: 0, bustCount: 0, color: PLAYER_COLORS[1], activeCards: {}, roundScore: 0, isBusted: false },
+                { id: 'p3', name: `${t('player')} 3`, totalScore: 0, maxRoundScore: 0, flip7Count: 0, freezeCount: 0, bustCount: 0, color: PLAYER_COLORS[2], activeCards: {}, roundScore: 0, isBusted: false }
             ];
         }
 
         function initApp() {
+            const savedLanguage = loadFromStorage('flip7_language');
+            language = TRANSLATIONS[savedLanguage] ? savedLanguage : (navigator.language.toLowerCase().startsWith('de') ? 'de' : 'en');
             const savedPlayers = loadFromStorage('flip7_players_v3');
             if (savedPlayers && Array.isArray(savedPlayers) && savedPlayers.length > 0) {
                 players = savedPlayers.map(p => ({
@@ -928,8 +1031,16 @@
                 roundHistory = savedHistory;
             }
 
-            renderPlayers();
+            if (!savedLanguage && language === 'en') {
+                players.forEach(player => {
+                    if (/^p[1-3]$/.test(player.id) && player.name === `Spieler ${player.id.slice(1)}`) {
+                        player.name = `Player ${player.id.slice(1)}`;
+                    }
+                });
+            }
+
             initChart();
+            applyTranslations();
         }
 
         function saveState() {
@@ -1045,7 +1156,7 @@
                 // ANPASSUNG: Zeile 2 Dynamisch berechnen (+Kartenpunkte und (Voraussichtlicher Gesamtstand))
                 let subScoreHTML = '';
                 if (isBusted) {
-                    subScoreHTML = `<span class="score-sub bust-text">Bust</span>`;
+                    subScoreHTML = `<span class="score-sub bust-text">${t('bust')}</span>`;
                 } else if (player.roundScore > 0) {
                     const projectedScore = player.totalScore + player.roundScore;
                     subScoreHTML = `<span class="score-sub">+${player.roundScore} (${projectedScore})</span>`;
@@ -1057,15 +1168,15 @@
                     <div class="player-progress" style="width: ${ratio}%;"></div>
                     <div class="player-row-content">
                         <div class="player-info">
-                            <div class="player-name-wrapper" onclick="openEditPlayerModal('${player.id}')" title="Klicken zum Bearbeiten">
+                            <div class="player-name-wrapper" onclick="openEditPlayerModal('${player.id}')" title="${t('editPlayerHint')}">
                                 <div class="player-color-dot" style="background-color: ${player.color};"></div>
                                 <span class="player-name">${escapeHtml(player.name)}</span>
                             </div>
                             <div class="player-stats-icons">
-                                <span class="stat-badge ${player.maxRoundScore > 0 ? 'highlight' : ''}" title="Höchste Runde">🏆 ${player.maxRoundScore}</span>
-                                <span class="stat-badge ${player.flip7Count > 0 ? 'highlight' : ''}" title="Flip 7 Count">⚡ ${player.flip7Count}</span>
-                                <span class="stat-badge ${player.freezeCount > 0 ? 'highlight' : ''}" title="Freeze Count">❄️ ${player.freezeCount}</span>
-                                <span class="stat-badge ${player.bustCount > 0 ? 'highlight' : ''}" title="Raus-Zähler">💥 ${player.bustCount}</span>
+                                <span class="stat-badge ${player.maxRoundScore > 0 ? 'highlight' : ''}" title="${t('bestRound')}">🏆 ${player.maxRoundScore}</span>
+                                <span class="stat-badge ${player.flip7Count > 0 ? 'highlight' : ''}" title="${t('flip7Count')}">⚡ ${player.flip7Count}</span>
+                                <span class="stat-badge ${player.freezeCount > 0 ? 'highlight' : ''}" title="${t('freezeCount')}">❄️ ${player.freezeCount}</span>
+                                <span class="stat-badge ${player.bustCount > 0 ? 'highlight' : ''}" title="${t('bustCount')}">💥 ${player.bustCount}</span>
                             </div>
                         </div>
 
@@ -1080,10 +1191,10 @@
                         </div>
 
                         <div class="player-actions">
-                            <button type="button" class="btn btn-bust ${isBusted ? 'active' : ''}" onclick="toggleBust('${player.id}')" title="Spieler aus dieser Runde werfen">
-                                💥 Raus
+                            <button type="button" class="btn btn-bust ${isBusted ? 'active' : ''}" onclick="toggleBust('${player.id}')" title="${t('bustHint')}">
+                                💥 ${t('bust')}
                             </button>
-                            <button type="button" class="btn btn-secondary btn-icon" onclick="deletePlayer('${player.id}')" title="Spieler löschen">🗑️</button>
+                            <button type="button" class="btn btn-secondary btn-icon" onclick="deletePlayer('${player.id}')" title="${t('deletePlayerHint')}">🗑️</button>
                         </div>
                     </div>
                 `;
@@ -1163,10 +1274,10 @@
             const logContainer = document.getElementById('log-list-container');
             const logCount = document.getElementById('log-round-count');
             logContainer.innerHTML = '';
-            logCount.innerText = `${roundHistory.length} Runden`;
+            logCount.innerText = `${roundHistory.length} ${t(roundHistory.length === 1 ? 'roundSingular' : 'rounds')}`;
 
             if (roundHistory.length === 0) {
-                logContainer.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 20px;">Noch keine Runden gespielt.</div>`;
+                logContainer.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 20px;">${t('noRounds')}</div>`;
                 return;
             }
 
@@ -1194,9 +1305,9 @@
                                 <span style="font-weight:700; color:${p.color};">${escapeHtml(p.name)}</span>
                                 <div>
                                     <button type="button" class="log-bust-btn ${isBust ? 'active' : ''}" onclick="toggleLogBust(${rIdx}, '${p.id}')">
-                                        💥 Raus
+                                        💥 ${t('bust')}
                                     </button>
-                                    <span style="font-weight:700; margin-left: 8px; color: var(--accent-green);">+${roundPts} Pkt</span>
+                                    <span style="font-weight:700; margin-left: 8px; color: var(--accent-green);">+${roundPts} ${t('pointsShort')}</span>
                                 </div>
                             </div>
                             <div class="log-player-cards-grid">
@@ -1208,8 +1319,8 @@
 
                 roundCard.innerHTML = `
                     <div class="log-round-header">
-                        <span>Runde ${rData.round}</span>
-                        <button type="button" class="btn btn-danger" style="font-size:0.75rem; padding: 2px 8px;" onclick="deleteRound(${rIdx})">Löschen</button>
+                        <span>${t('round')} ${rData.round}</span>
+                        <button type="button" class="btn btn-danger" style="font-size:0.75rem; padding: 2px 8px;" onclick="deleteRound(${rIdx})">${t('delete')}</button>
                     </div>
                     ${playersLogHTML}
                 `;
@@ -1258,7 +1369,7 @@
         }
 
         function deleteRound(index) {
-            if (confirm(`Runde ${roundHistory[index].round} wirklich löschen? Alle Punkte werden neu berechnet.`)) {
+            if (confirm(t('deleteRoundConfirm', { round: roundHistory[index].round }))) {
                 roundHistory.splice(index, 1);
                 roundHistory.forEach((r, idx) => {
                     r.round = idx + 1;
@@ -1390,14 +1501,14 @@
         }
 
         function deletePlayer(id) {
-            if (confirm('Spieler wirklich entfernen?')) {
+            if (confirm(t('deletePlayerConfirm'))) {
                 players = players.filter(p => p.id !== id);
                 renderPlayers();
             }
         }
 
         function resetGame() {
-            if (confirm('Möchtest du ein neues Spiel starten und alle Punkte zurücksetzen?')) {
+            if (confirm(t('resetConfirm'))) {
                 players.forEach(p => {
                     p.totalScore = 0;
                     p.maxRoundScore = 0;
@@ -1583,7 +1694,7 @@
                 tooltip.style.display = 'block';
                 tooltip.style.left = (hit.x + hit.w / 2) + 'px';
                 tooltip.style.top = Math.max(0, hit.y - 32) + 'px';
-                tooltip.innerHTML = `<strong>${escapeHtml(hit.playerName)}</strong> (Runde ${hit.round}): ${hit.score} Pkt.`;
+                tooltip.innerHTML = `<strong>${escapeHtml(hit.playerName)}</strong> (${t('round')} ${hit.round}): ${hit.score} ${t('pointsShort')}`;
             } else {
                 tooltip.style.display = 'none';
             }
@@ -1599,8 +1710,9 @@
         let animationFrameId = null;
 
         function triggerWinnerAnimation(winner) {
+            winnerPlayerId = winner.id;
             document.getElementById('winner-name-display').innerText = winner.name;
-            document.getElementById('winner-score-display').innerText = `Mit ${winner.totalScore} Punkten gewonnen! (Ziel: ${targetScore})`;
+            document.getElementById('winner-score-display').innerText = t('winnerScore', { score: winner.totalScore, target: targetScore });
             document.getElementById('winner-modal').classList.add('active');
 
             startConfetti();
